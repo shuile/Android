@@ -1,0 +1,25 @@
+碎片化：Android各个平台的差异
+
+屏幕尺寸：屏幕对角线的长度，单位是英寸，1英寸=2.54cm
+
+屏幕分辨率：在横纵方向上的像素点数，单位是px，1px是1个像素点，一般指纵向像素*横向像素
+
+屏幕像素密度：每英寸上的像素点数，单位是dpi，即“dot per inch”。例如：320*240，2.5inch，为160dpi。
+
+单位：
+px：pixel，像素，1px代表屏幕上一个物理的像素点；
+dip、dp：Density Independent Pixels，即密度无关像素。1dp=(像素密度 / 160dpi) * 1px。例如：160dpi下，1dp=1px；320dpi，1dp=2px
+sp：scaled pixels，与dp类似，用于设置字体大小。
+
+mdpi：120dpi~160dpi
+hdpi：160dpi~240dpi
+xhdpi：240dpi~320dpi
+xxhdpi：320dpi~480dpi
+xxxhdpi：480dpi~640dpi
+
+布局适配方法：1、禁用绝对布局；2、少用px；3、使用wrap_content、match_parent、layout_weight；4、重建布局文件.
+a. wrap_content+layout_weight:先按照内容的多少去设定空间大小，然后按照权重比例来分配剩余空间；
+b. match_parent+layout_weight:控件比例=父容器大小+权重比例*剩余空间大小。
+	例如：两个控件(1:2)：控件1 = 1 * match_parent + 1 / (1 + 2) * (1 * match_parent - 2 * match_parent) = 2 / 3 * match_parent
+					   控件2 = 1 * match_parent + 2 / (1 + 2) * (1 * match_parent - 2 * match_parent) = 1 / 3 * match_parent
+c. 0dp+layout_weight:按照设定的比例去分配空间
