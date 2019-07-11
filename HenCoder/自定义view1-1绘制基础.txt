@@ -1,0 +1,140 @@
+1、方式：重写绘制方法(最常用：onDraw())
+2、绘制的关键：Canvas
+	Canvas的绘制类方法：drawXXX()(关键参数：Paint)
+	Canvas的辅助类方法：范围裁切(clipXXX())和几何变换(Matrix)
+3、自定义绘制知识的四个级别
+	①Canvas的drawXXX()系列方法及Paint最常见的使用；
+	②Paint的完全攻略
+	③Canvas对绘制的辅助--范围裁切和几何变换
+	④使用不同的绘制方法来控制绘制顺序
+3、Cavas.drawXXX()和Paint基础（更多查看google文档：Canvas和Paint类）
+	颜色填充
+		canvas.drawColor(@ColorInt int color)
+		canvas.drawRGB(int r, int g, int b)
+		canvas.drawARGB(int a, int r, int g, int b)
+	画圆
+		canvas.drawCircle(float centerX, float centerY, float radius, Paint paint)
+		paint.setColor(Color.RED); // 设置为红色  
+		paint.setStyle(Paint.Style.STROKE); // Style 修改为画线模式
+		paint.setStrokeWidth(float width); // 来设置线条的宽度
+		Paint paint = new Paint(Paint.ANTI_ALIAS_FLAG); // 抗锯齿
+		Paint.setAntiAlias(boolean aa); // 抗锯齿
+	画矩形
+		canvas.drawRect(float left, float top, float right, float bottom, Paint paint)
+		drawRect(RectF rect, Paint paint)
+		drawRect(Rect rect, Paint paint)
+	画点
+		canas.drawPoint(float x, floay y, Paint paint)
+		paint.setStrokeWidth(width); // 点的大小
+		paint.setStrokeCap(cap); // 点的形状
+	画点（批量）
+		drawPoints(float[] pts, int offset, int count, Paint paint)
+		drawPoints(float[] pts, Paint paint)
+	画椭圆
+		drawOval(float left, float top, float right, float bottom, Paint paint)
+		drawOval(RectF rect, Paint paint)
+	画线
+		drawLine(float startX, float startY, float stopX, float stopY, Paint paint)
+	画线（批量）
+		drawLines(float[] pts, int offset, int count, Paint paint)
+		drawLines(float[] pts, Paint paint)
+	画圆角矩形
+		drawRoundRect(float left, float top, float right, float bottom, float rx, float ry, Paint paint)
+		drawRoundRect(RectF rect, float rx, float ry, Paint paint)
+	绘制弧形或扇形
+		drawArc(float left, float top, float right, float bottom, float startAngle, float sweepAngle, boolean useCenter, Paint paint)
+		例：
+		paint.setStyle(Paint.Style.FILL); // 填充模式
+		canvas.drawArc(200, 100, 800, 500, -110, 100, true, paint); // 绘制扇形  
+		canvas.drawArc(200, 100, 800, 500, 20, 140, false, paint); // 绘制弧形  
+		paint.setStyle(Paint.Style.STROKE); // 画线模式  
+		canvas.drawArc(200, 100, 800, 500, 180, 60, false, paint); // 绘制不封口的弧形
+	画自定义图形
+		drawPath(Path path, Paint paint)
+4、Path方法第一类：直接描述路径
+	第一组：addXXX() -----添加子图形
+		添加圆
+			addCircle(float x, float y, float radius, Direction dir)
+			显示，例：
+				path.addCircle(300, 300, 2000, Path.Direction.CW);
+				...
+				canvas.drawPath(path paint);
+		添加椭圆
+			addOval(float left, float top, float right, float bottom, Direction dir) / addOval(RectF oval, Direction dir)
+		添加矩形
+			addRect(float left, float top, float right, float bottom, Direction dir) / addRect(RectF rect, Direction dir)
+		添加原价矩形
+			addRoundRect(RectF rect, float rx, float ry, Direction dir)
+			addRoundRect(float left, float top, float right, float bottom, float rx, float ry, Direction dir)
+			addRoundRect(RectF rect, float[] radii, Direction dir)
+			addRoundRect(float left, float top, float right, float bottom, float[] radii, Direction dir)
+		添加另一个Path
+			addPath(Path path)
+	第二组：XXXTo -----画线（直线或曲线）
+		画直线
+			lineTo(float x, float y)	(x, y)为绝对坐标
+			rLineTo(float x, float y)	(x, y)为相对坐标
+			例：
+				paint.setStyle(Style.STROKE);
+				path.lineTo(100, 100);	// 由当前位置(0, 0)向(100, 100)画一条直线
+				path.rLineTo(100, 0);	// 由当前位置(100, 100)向正右方向100像素的位置画一条直线
+		画二次贝塞尔曲线
+			quadTo(float x1, float y1, float x2, float y2)
+			rQuadTo(float dx1, float dy1, float dx2, float dy2)
+		画三次贝塞尔曲线
+			cubicTo(float x1, float y1, float x2, float y2, float x3, float y3)
+			rCubicTo(float x1, float y1, float x2, float y2, float x3, float y3)
+		移动到目标位置
+			moveTo(float x, float y)
+			rMoveTo(float x, float y)
+			例：
+				paint.setStyle(Style.STROKE);
+				path.lineTo(100, 100); // 画斜线
+				path.moveTo(200, 100);	// 我移--
+				path.rLineTo(200, 0);	// 画竖线
+		画弧形
+			arcTo(RectF oval, float startAngle, float sweepAngle, boolean forceMoveTo)
+			arcTo(float left, float top, float right, float bottom, float startAngle, float sweepAngle, boolean forceMoveTo)
+			arcTo(RectF oval, float startAngle, float sweepAngle)
+			例：
+				paint.setStyle(Style.STROKE);
+				path.lineTo(100, 100);
+				path.arcTo(100, 100, 300, 300, -90, 90, true);	// 强制移动到弧形起点(无痕迹)
+		封闭当前子图形
+			close()
+			例一：
+				paint.setStyle(Style.STROKE);
+				path.moveTo(100, 100);
+				path.lineTo(200, 100);
+				path.lineTo(150, 150);
+				// 子图形未封闭
+			例二：
+				paint.setStyle(Style.STROKE);
+				path.moveTo(100, 100);
+				path.lineTo(200, 100);
+				path.lineTo(150, 150);
+				path.close();	// 使用close()封闭子图形。等价于path.lineTo(100, 100)
+			注：
+				当需要填充图形时(即Paint.Style为FILL或FILL_AND_STROKE)，PATH会自动封闭子图形
+5、Path方法第二类：辅助的设置或计算
+	设置填充方式
+		Path.setFillType(Path.FillType ft)
+			EVEN_ODD 	交叉填充
+			WINDING 	全填充
+			INVERSE_EVEN_ODD	反转
+			INVERSE_WINDING		反转
+		EVEN_ODD和WINDING的原理
+			EVEN_ODD
+				even_odd rule(奇偶原则)：队员平面中的额任意一点，向任意方向射出一条射线，这条射线和图形相交的次数(相交才算，相切不算)。如果是奇数，则认为在图形内部，需要被涂色，否则在图形外部，不需要被涂色。
+			WINDING
+				non-zero winding rule(非零环绕数原则)：首先，需要图形中所有线条都是有绘制方向的；然后，从平面中的点向任意方向射出一条射线，计算规则：以0为初始值，对于射线和图形的所有交点，遇到每个顺时针的交点(图形从射线的左边向右穿过),结果加1，反之，结果减1，最终，结果不为0，则认为在图形内部，需要被涂色，否则为在图形外部，不需要涂色。
+	画Bitmap
+		drawBitmap(Bitmap bitmap, float left, float top, paint paint)
+		drawBitmap(Bitmap bitmap, Rect src, RectF dst, Paint paint)
+		drawBitmap(Bitmap bitmap, Rect src, Rect dst, Paint paint)
+		drawBitmap(Bitmap bitmap, Matrix matrix, Paint paint)
+		drawBitmapMesh()  可以绘制具有网格拉伸效果的Bitmap
+	绘制文字
+		drawText(String text, float x, float y, Paint paint)
+	设置文字大小
+		Paint.setTextSize(float textSize)

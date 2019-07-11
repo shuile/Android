@@ -1,0 +1,4 @@
+1、颜色
+	基本颜色
+		直接设置颜色
+			setColor(int color)
