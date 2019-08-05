@@ -1,0 +1,98 @@
+八、安全
+	1、禁止使用常量初始化矢量参数构建IvParameterSpec，建议IV通过随机方式产生。
+		说明：
+			使用常量初始化向量，密码文本的可预测性会高很多，容易受到字典式攻击。iv的作用主要是用于产生密文的第一个block，以使最终生成的密文产生差异(铭文相同的情况下)，使密码攻击变得更为困难。
+		正例：
+			byte[] rand = new byte[16];
+			SecureRandom r = new SecureRandom();
+			r.nextBytes(rand);
+			IvParameterSpec iv = new ivParameterSpec(rand);
+		反例;
+			IvParameterSpec iv = new IvParameterSpec("1234567890".getBytes());
+			System.out.println(iv.getIV());
+	2、将android:allowbackup属性必须设置为false，组织应用数据被导出。
+		说明:
+			android:allowBackup原本是Android提供的adb调试功能，如果设置为true，可以到处应用数据备份并在任意设备上恢复。这对应用安全性和用户数据隐私构成极大威胁，所以必须设置为false，放置数据泄露。
+		正例：
+			<application
+				android:allowbackup="false"
+				android:largeHeap="true"
+				android:icon="@drawable/test_launcher"
+				android:label="@string/app_name"
+				android:theme="@style/AppTheme">
+	3、如果使用自定义HostnameVerifier实现类，必须在verify()方法中校验服务器主机名的合法性，否则可能受到中间人攻击。
+		说明:
+			在与服务器建立https连接时，如果URL的主机名和服务器的主机名不匹配，则可通过该回调接口来判断是否允许建立连接。如果回调内实现不恰当，没有有效校验主机名，甚至默认接收所有主机名，会大大增加安全风险。
+		反例：
+			HostnameVerifier hnv = new HostnameVerifier() {
+				@Override
+				public boolean verify(String hostname, SSLLseeion session) {
+					// 不做校验，接受任意域名服务器
+					return true;
+				}
+			};
+			HttpsURLConnection.setDefaultHostnameVerifier(hnv);
+	4、如果使用自定义 X509TrustManager 实现类，必须在checkServerTrusted()方法中校验服务端证书的合法性，否则可能受到中间人攻击。
+		说明:
+			常见误区是checkServerTrusted()方法根本没有实现，这将导致 X509TrustManager形同虚设。该方法中需要实现完备的校验逻辑，对于证书错误抛出CertificateException。
+		正例：
+			HostnameVerifier hnv = new HostnameVerifier() {
+				@Override
+				public boolean verify(String hostname, SSLSession session) {
+					if ("yourhostname".equals(hostanme)) {
+						return true;
+					} else {
+						HostnameVerifier gv = HttpsURLConnection.getDefaultHostnameVerifier();
+						return hv.verify(hostname, session);
+					}
+				}
+			};
+		反例：
+			TrustManager tm = new TrustManager() {
+				public void checkClientTrusted(X509Certificate[] chain, String authType) throws CertificateException {
+					// do nothing, 接收任意客户端证书
+				}
+
+				public void checkServerTrusted(X509Certificate[] chain, String authType) throws CertificateException {
+					// do nothing, 接收任意服务端证书
+				}
+
+				public X509Certificate[] getAcceptedIssuers() {
+					return null;
+				}
+			};
+			sslContext.init(null, new TrustManager[]{tm}, null);
+	5、在SDK支持的情况下，Android应用必须使用V2签名，这将对APK文件的修改做更多的保护。
+	6、所有的Android基础组件(Activity、Service、BroadcastReceiver、ContentProvider等)都不应在没有严格权限控制的情况下，将android:exported设置为true。
+	7、WebView应设置WebView getSettings() setAllowFileAccess(false)、WebView getSettings setAllowFileAccessFromFileURLs(false)、WebView getSettings() setAllowUniversalAccessFromFileURLs(false),阻止file scheme URL的访问。
+	8、不要把敏感信息打印到log中。
+		说明：
+			在开发过程中，为了方便测试，通常会使用log函数输出一些关键流程的信息，这些信息中通常会包含敏感内容，让攻击者更加容易了解App内部结构，方便破解和攻击，甚至直接获取到有价值的敏感信息。
+		反例：
+			String username = "log_leak";
+			String password = "log_leak_pwd";
+			Log.d("MY_APP", "username" + username);
+			Log.v("MY_APP", "send message to server");
+		以上代码使用Log.d Log.v打印程序的执行过程的username等调试信息，日志没有关闭，攻击者可以直接从Logcat中读取这些敏感信息。所以在产品的线上版本中关闭调试接口，不要输出敏感信息。
+	9、确保应用发布版本的android:debuggable属性设置为false。
+	10、本地加密密钥不要硬编码在代码中，更不能使用SharedPreferences等本地持久化机制存储。应选择Android自身的密钥库(KeyStore)机制或者其他安全性更高的安全解决方案保存。
+		说明：
+			应用程序在加解密时，使用硬编码在程序中的密钥，攻击者通过反编译拿到密钥可以轻易解密App通信数据。
+	11、addJavascriptInterface()可以添加JS对本地Java方法的调用，但这本身会导致恶意代码的攻击。在Android 4.2(API Level 17)以下，不应再使用这样的调用方式。在Android 4.2及以上，需要对本地被远程调用的方法显示添加 @JavascriptInterface annotation。
+	12、使用Android的AES/DES/DESede加密算法时，不要使用ECB加密模式，应使用CBC或CFB加密模式。
+		说明：
+			加密模式有ECB、CBC、CFB、OFB等，其中ECB安全性较弱，如果使用固定的密钥，相同的明文将会生成相同的密文，容易受到字典攻击，建议使用CBC、CFB或OFB等模式。
+			a. ECB: Electronic codebook, 电子密码本模式
+			b. CBC: Cipher-block chaining, 密码分组链接模式
+			c. CFB: Cipher feedback, 密文反馈模式
+			d. OFB: Output feedback, 输出反馈模式
+	13、Android APP在HTTPS通信中，验证策略需要改成严格模式。
+		说明：
+			Android APP在HTTPS通信中，使用ALLOW_ALL_HOSTNAME_VERIFIER,、表示允许和所有的HOST建立SSL通信，这会存在中间人攻击的风险，最终导致敏感信息可能会被劫持，以及其他形式的攻击。
+		反例：
+			SSLSocketFactory sf = new MySSLSocketFactory(trustStore);
+			sf.setHostnameVerifier(SSLSocketFactory.ALLOW_ALL_HOSTNAME_VERIFIER);
+		ALLOW_ALL_HOSTNAME_VERIFIER 关闭host验证，允许和所有的host建立SSL通信，BROWSER_COMPATIBLE_HOSTNAME_VERIFIER和浏览器兼容的验证策略，即通配符能够匹配所有子域名，STRICT_HOTSNAME_VERIFIER严格匹配模式，hostname必须匹配第一个CN或者任何一个subject-alts，以上例子使用了ALLOW_ALL_HOSTNAME_VERIFIER，需要改成STRICT_HOSTNAME_VERIFIER。
+	14、在Android 4.2(API Level 17)及以上，对安全性要求较高的应用可在Activity中，对Activity所关联的Window应用WindowManager.LayoutParams.FLAG_SECURE，放置被截屏、录屏。但要注意的是，一个Activity关联的Window可能不止一个，如果使用了Dialog/DialogFragment等控件弹出对话框，他们本身也会创建一个新的Window，也一样需要保护。
+	15、zip中不要包含 ../../file这样的路径，可能被篡改目录结构，造成攻击。
+	16、MD5和SHA-1、SHA-256等常用算法是Hash算法，有一定的安全性，但不能代替加密算法。敏感信息的存储和传输，需要使用专业的加密机制。

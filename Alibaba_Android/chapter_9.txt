@@ -1,0 +1,14 @@
+九、其他
+	1、不能使用System.out.println打印log。
+		正例：
+			Log.d(TAG, "Some Android Debug info...");
+		反例：
+			System.out.println("System out println...");
+	2、Log的tag不能使""。
+		说明：
+			日志的tag是空字符串没有任何意义，也不利于过滤日志。
+		正例：
+			private static String TAG = "LoginActivity";
+			Log.e(TAG, "Login failed");
+		反例：
+			Log.e("", "login failed");

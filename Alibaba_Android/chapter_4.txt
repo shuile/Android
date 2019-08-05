@@ -1,0 +1,210 @@
+四、UI与布局
+	1、布局中不得不使用ViewGroup多重嵌套时，不要使用LinearLayout嵌套，改用RelativeLayout，可以有效降低嵌套数。
+	说明：
+	Android应用页面上任何一个View都需要经过meagsure、layout、draw三个步骤才能被正确的渲染。从xml layout的顶部节点开始进行measure，每个子节点都需要向自己的父节点提供自己的尺寸来决定展示的位置，在此过程中可能还会重新measure(由此可能导致measure的时间消耗为原来的2-3倍)。节点所处位置越深，嵌套带来的measure越多，计算就会越费时。
+	同时，页面拥上的View越多，measure、layout、draw所花费的时间就越久。要缩短这个时间，关键是保持View的树形结构尽量扁平，而且要移除所有不需要渲染的View。理想情况下，总共的measure，layout。draw时间应该被很好的控制在16ms以内，以保证滑动屏幕时UI的流畅。
+	要找到那些多余的View(增加渲染延迟的view),可以用Android Studio Monitor里的Hierarchy Viewer工具，可视化的查看所有的view。
+	2、在Activity中显示对话框或弹出浮层时，尽量使用DialogFragment，而非Dialog/AlertDialog，这样便于随Activity生命周期管理对话框/弹出浮层的生命周期。
+	正例：
+		public void showPromptDialog(String text) {
+			DialogFragment promptDialog = new DialogFragment() {
+				@Override
+				public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+					getDialog().requestWindowFeature(Window.FEATURE_NO_TITLE);
+					View view = inflater.inflate(R.layout.fragment_prompt, container);
+					return view;
+				}
+			}
+			prompyDialog.show(getFragmentManager(), text);
+		}
+	3、源文件同意采用UTF-8的形式进行编码。
+	4、禁止在非UI编程进行View相关操作。
+	5、文本大小使用单位dp，View大小使用单位dp。对于TextView，如果在文字大小确定的情况下推荐使用wrap_content布局避免出现文字显示不全的适配问题。
+	说明：
+	之所以文本大小也推荐使用dp而非sp，因为sp是Android早起推荐使用的，但其实sp不仅和dp一样受屏幕密度的影响，还受到系统设置里字体大小的影响，所以使用dp对于应用开发会更加保证UI的一致性和还原度。
+	6、禁止在设计布局时多次为子View和父View设置同样北京造成页面过度绘制，推荐将不需要显示的布局进行及时隐藏。
+	正例：
+		<?xml version="1.0" encoding="utf-8"?>
+		<Linearlayout xmlns:android="http://schemas.android.com/apk/res/android"
+			android:layout_width="match_parent"
+			android:layout_height="match_parent"
+			android:orientation="vertical">
+			<TextView 
+				android:layout_width="match_parent"
+				android:layout_height="wrap_content"
+				android:text="@string/hello"/>
+			<Button 
+				android:id="@+id/btn_mybutton"
+				android:layout_width="match_parent"
+				android:layout_height="wrap_content"
+				android:text="click it!"/>
+			<ImageView 
+				android:id="@+id/img"
+				android:layout_width="match_parent"
+				android:layout_height="wrap_content"
+				android:visibility="gone"
+				android:src="@drawable/youtube"/>
+			<TextView 
+				android:text="it is an example!"
+				android:layout_width="match_parent"
+				android:layout_height="wrap_content"/>
+		</LinearLayout>
+	反例：
+		@Override
+		protected void onDraw(Canvas canvas) {
+			super.onDraw(canvas);
+			int width = getWidth();
+			int hieght = getHeight();
+			mPaint.setColor(Color.GRAY);
+			canvas.drawRect(0, 0, width, hieght, mPaint);
+			mPaint.setColor(Color.CYAN);
+			canvas.drawRect(0, height / 4, width, height, mPaint);
+			mPaint.setColor(Color.DKGRAY);
+			canvas.drawRect(0, height / 3, width, hieght, mPaint);
+			mPaint.setColor(Color.LTGRAY);
+			canvas.drawRect(0, hieght / 2, width, height, mPaint);
+		}
+	7、灵活使用布局，推荐merge、ViewStub来优化布局，尽可能多的减少UI布局层级，推荐使用FrameLayout，LinearLayout，RelativeLayout次之。
+	8、在需要时刻刷新某一区域的组件时，建议通过以下方式避免引发全局layout刷新：
+		a. 设置固定的View大小的宽高，如倒计时组件
+		b. 调用View的layout方法修改位置，如弹幕组件
+		c. 通过修改canvas位置并且调用invalidate(int l, int t, int r, int b)等方式限定刷新区域
+		d. 通过设置一个是否允许requestLayout的变量，然后重写控件的requestLayout、onSizeChanged方法，判断控件的大小没有改变的情况下，当进入requestLayout的时候，直接返回而不调用super的requestLayout方法
+	9、不能在Activity没有完全显示时显示PopupWindow和Dialog
+		说明：
+		Android Activity创建时的生命周期，按照onCreate()->onStart()->onResume()->onAttachedToWindow()->onWindowFoucusChanged()的顺序，其中在Activity onAttachedToWindow()时，Activity会与它的Window关联，这时UI才会开始绘制，在Activity onWindowFocusChanged()时，UI才变成可交互状态，可以提示用户使用。如果在Window未关联时就创建对话框，UI可能显示异常。推荐的做法是在Activity onAttachedToWindow()之后(其实最好是Activity onWindowFocusChanged()之后)才创建对话框。
+	10、尽量不要使用AnimationDrawable，它在初始化的时候就将所有图片加载到内存中，特别占内存，并且还不能释放，释放之后下次进入再次加载时会报错。
+		说明：
+		Android的帧动画可以使用AnimationDrawable实现，但是如果你的帧动画中如果包含过多帧图片，一次性加载所有帧图片所导致的内存消耗会使低端机发生OOM异常。帧动画所使用的图片要注意降低内存消耗，当图片比较大时，容易出现OOM。
+		正例：
+		图片数量较少的AnimationDrawable还是可以接受的。
+			<?xml version="1.0" encoding="utf-8"?>
+			<animation-list xmlns:android="http://schamas.android.com/apk/res/android"
+				android:oneshot="true">
+				<item android:duration="500" android:drawable="@drawable/ic_heart_100" />
+				<item android:duration="500" android:drawable="@drawable/ic_heart_75" />
+				<item android:duration="500" android:drawable="@drawable/ic_heart_50" />
+				<item android:duration="500" android:drawable="@drawable/ic_heart_25" />
+				<item android:duration="500" android:drawable="@drawable/ic_heart_0" />
+			</animation-list>
+		反例：
+			<?xml version="1.0" encoding="utf-8"?>
+			<animation-list xmlns:android="http://schemas.android.com/apk/res/android"
+				android:oneshot="false">
+				<item android:drawable="@drawable/soundwave_new_1_40" android:duration="100" />
+				<item android:drawable="@drawable/soundwave_new_1_41" android:duration="100" />
+				<item android:drawable="@drawable/soundwave_new_1_42" android:duration="100" />
+				<item android:drawable="@drawable/soundwave_new_1_43" android:duration="100" />
+				<item android:drawable="@drawable/soundwave_new_1_44" android:duration="100" />
+				<item android:drawable="@drawable/soundwave_new_1_45" android:duration="100" />
+				<item android:drawable="@drawable/soundwave_new_1_46" android:duration="100" />
+				<item android:drawable="@drawable/soundwave_new_1_47" android:duration="100" />
+				<item android:drawable="@drawable/soundwave_new_1_48" android:duration="100" />
+				<item android:drawable="@drawable/soundwave_new_1_49" android:duration="100" />
+				<item android:drawable="@drawable/soundwave_new_1_50" android:duration="100" />
+				<item android:drawable="@drawable/soundwave_new_1_51" android:duration="100" />
+				<item android:drawable="@drawable/soundwave_new_1_52" android:duration="100" />
+				<item android:drawable="@drawable/soundwave_new_1_53" android:duration="100" />
+				<item android:drawable="@drawable/soundwave_new_1_54" android:duration="100" />
+				<item android:drawable="@drawable/soundwave_new_1_55" android:duration="100" />
+				<item android:drawable="@drawable/soundwave_new_1_56" android:duration="100" />
+				<item android:drawable="@drawable/soundwave_new_1_57" android:duration="100" />
+				<item android:drawable="@drawable/soundwave_new_1_58" android:duration="100" />
+				<item android:drawable="@drawable/soundwave_new_1_59" android:duration="100" />
+				<item android:drawable="@drawable/soundwave_new_1_60" android:duration="100" />
+				<item android:drawable="@drawable/soundwave_new_1_61" android:duration="100" />
+				<item android:drawable="@drawable/soundwave_new_1_62" android:duration="100" />
+				<item android:drawable="@drawable/soundwave_new_1_63" android:duration="100" />
+				<item android:drawable="@drawable/soundwave_new_1_64" android:duration="100" />
+				<item android:drawable="@drawable/soundwave_new_1_65" android:duration="100" />
+				<item android:drawable="@drawable/soundwave_new_1_66" android:duration="100" />
+				<item android:drawable="@drawable/soundwave_new_1_67" android:duration="100" />
+				<item android:drawable="@drawable/soundwave_new_1_68" android:duration="100" />
+				<item android:drawable="@drawable/soundwave_new_1_69" android:duration="100" />
+			</animation-list>
+			上述如此多图片的动画就不建议使用AnimationDrawable了。
+	11、不能使用ScrollView包裹ListView/GridView/ExpandableListView。因为这样会把ListView的所有item都加载到内存中，要消耗巨大的内存和cpu去绘制图面。
+		说明：
+		ScrollView中嵌套List或RecyclerView的做法官方明确禁止。除了开发过程中遇到的各种视觉问题和交互问题，这种做法对性能也有较大损耗。ListView等UI组件自身有垂直滚动功能，也没有必要再嵌套一层ScrollView。目前为了较好的UI体验，更贴近Material Desgin的设计，推荐使用NestedScrollView。
+		正例：
+			<?xml version="1.0" encoding="utf-8"?>
+			<LinearLayout>
+				<android.support.v4.widget.NestedScrollView>
+					<LinearLayout>
+						<ImageView />
+						...
+						<android.support.v7.widget.RecyclerView />
+					</LinearLayout>
+				</android.support.v4.widget.NestedScrollView>
+			</LinearLayout>
+		反例：
+			<ScrollView>
+				<LinearLayout>
+					<TextView />
+					...
+					<ListView />
+				</LinearLayout>
+			</ScrollView>
+	12、请不要在Android的Application对象中缓存数据。基础组件之间的数据共享请使用Intent等机制，也可使用SharedPreferences等数据持久化机制。
+	反例：
+		class MyApplication extends Application {
+			String username;
+			String getUsername() {
+				return username;
+			}
+
+			void setUsername(String username) {
+				this.username = username;
+			}
+		}
+
+		class SetUsernameActivity extends Activity {
+			void onCreate(Bundle savedInstanceSatte) {
+				super.onCreate(savedInstanceState);
+				setContentView(R.layout.set_username);
+				MyApplication app = (Myapplication) getApplication();
+				app.setUsername("tester1");
+				startActivity(new Intent(this, GetUsernameActivity.class));
+			}
+		}
+
+		class GetUsernameActivity extends Activtiy {
+			TextView tv;
+
+			@Override
+			void onCreate(Bundle savedInstanceState) {
+				super.onCreate(savedInstanceState);
+				setContentView(R.layout.get_username);
+				tv = (TextView) findViewById(R.id.username);
+			}
+
+			@Override
+			void onResume() {
+				super.onResume();
+				MyApplication app = (MyApplication) getApplication();
+				tv.setText("Welcome back!" + app.getUsername().toUpperCase());
+			}
+		}
+	13、使用Toast时，建议定义一个全局的Toast对象，这样可以避免连续显示Toast时不能取消上一次Toast消息的情况。即使需要连续弹出Toast，也应避免直接调用Toast makeText方法。
+	14、使用Adapter的时候，如果你使用了ViewHolder做缓存，在getView()的方法中无论这项convertView的每个子控件是否需要设置属性(比如某个TextView设置的文本可能为null，某个按钮的背景色为透明，某控件的颜色为透明等)，都需要为其显示设置属性(TextView的文本为空也需要设置setText("")，背景透明也需要设置)，否则在滑动的过程中，因为adapter item复用的原因，会出现内容的显示错乱。
+	正例：
+		@Override
+		public view getView(int position, View convertView, ViewGroup parent) {
+			ViewHolder myViews;
+			if (convertView == null) {
+				myViews = new ViewHolder();
+				convertView = mInflater.inflate(R.laoyut.list_item, null);
+				myViews.mUsername = (TextView) convertView.findViewById(R.id.username);
+				convertView.setTag(myViews);
+			} else {
+				myViews = (ViewHolder) convertView.getTag();
+			}
+			Info p = infoList.get(position);
+			String dn = p.getDisplayName;
+			myViews.mUsername.setText(StringUtils.isEmpty(dn) ? "" : dn);
+			return convertView;
+		}
+
+		static class ViewHolder {
+			private TextView mUsername;
+		}

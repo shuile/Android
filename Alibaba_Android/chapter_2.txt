@@ -1,0 +1,54 @@
+二、Android资源文件命名与使用
+	1、资源文件需带模块前缀；
+	2、layout文件的命名方式
+		Activity: module_activity
+		Fragment: module_fragment
+		Dialog: module_dialog
+		include: module_include
+		ListView item: module_list_item
+		RecyclerView item: module_recycler_item
+		GridView item: module_frid_item
+	3、drawable资源名称以小写单词+下划线的当时命名，根据分辨率不同存放在不同的drawable目录下
+		模块名_业务功能描述_控件描述_控件状态限定词
+		例如: module_login_btn_pressed, module_tabs_icon_home_normal
+	4、anim资源名称以小写单词+下划线的方式命名
+		模块名_逻辑名称_[方向|序号]
+		Tween动画资源: 尽可能以动画名称命名，如: module_fade_in, module_fade_out, module_push_down_in
+		Frame动画资源: 尽可能以模块+功能命名+序号，如: module_loading_grey_001
+	5、color资源使用#AARRGGBB格式，写入module_colors.xml文件中
+		模块名_逻辑名称_颜色
+		例如: <color name="module_btn_bg_color">#33b5e5e5</color>
+	6、dimen资源以小写单词+下划线方式命名，写入module_dimens.xml文件中
+		模块名_描述信息
+		例如: <dimen name="module_horizontal_line_height">1dp</dimen>
+	7、style资源采用"父style名称.当前style名称"方式命名，写入module_styles.xml文件中
+		例如: <style name="ParentTheme.ThisActivityTheme">
+				...
+		     </style>
+	8、string资源文件或者文本用到字符需要全部写入module_strings.xml文件中，字符串以小写单词+下划线的方式命名
+		模块名_逻辑名称
+		例如: module_login_tips, module_homepage_notice_desc
+	9、id资源原则上以驼峰法命名，View组件的资源id建议以View的缩写作为前缀
+		LinearLayout ll
+		RelativeLayout rl
+		ConstraintLayout cl
+		ListView lv
+		ScrollView sv
+		TextView tv
+		ImageView iv
+		ChechBox cb
+		RadioButton rb
+		EditText et
+		其他控件的缩写推荐使用小写字母并用下划线进行分割，例如: ProgressBar progress_bar, DatePicker date_picker
+	10、图片根据其分辨率，放在不同屏幕密度的drawable目录下管理，否则在低密度设备上导致内存占用增加，又可能在高密度设备上导致图片不够清晰。为了支持多种屏幕尺寸和密度，Android提供了多种通用屏幕密度来适配。常用如下：
+		ldpi - 120dpi
+		mdpi - 160dpi
+		hdpi - 240dpi
+		xhdpi - 320dpi
+		xxhdpi - 480dpi
+		xxxhdpi - 640dpi
+		Android的屏幕分辨率和密度并不存在严格的对应关系，应尽量避免直接基于分辨率来开发，而是通过适配不同的屏幕密度来保证控件和图片的显示效果。不同密度drawable目录中的图片分辨率设置，参考不同密度的dpi比例关系。
+		正例: 
+			为显示某个突变，将48 * 48的图标文件放在drawable-mdpi目录(160dpi)下；将72 * 72的图标文件放在drawable-hpi目录(240dpi)下；将96 * 96的图标文件放在drawable-xhpi目录(320dpi)下；将144 * 144的图标文件放在drawable-xxhdpi目录(480dpi)下。
+		反例：
+			上述图标，只有一个144 * 144的图标文件放在drawable目录下。

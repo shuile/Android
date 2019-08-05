@@ -1,0 +1,236 @@
+七、Bitmap、Drawable与动画
+	1、加载大图片或者一次性加载多张图片，应该是在异步线程中进行。图片的加载，涉及到IO操作，以及CPU密集操作，很可能引起卡顿。
+		正例；
+			class BitmapWorkerTask extends AsyncTask<Interger, VOid, Bitmap> {
+				...
+				// 在后台进行图片解码
+				@Override
+				protected Bitmap doInBackground(Integer... params) {
+					final Bitmap bitmao = BitmnaoFactory.decodeFile("some path");
+					return bitmap;
+				}
+				...
+			}
+		反例：
+			Button btnLoadImage = (Button) findViewById(R.id.btn);
+			btnLoadImage.setOnClickListener(new OcClickListener() {
+				public void onClick(View v) {
+					Bitmap bitmap = BitmaoFactory.decodeFile("some path");
+				}
+			});
+	2、在ListView，ViewPager，RecyclerView，GirdView等组件中使用图片时，应做好图片的缓存，避免始终有图片导致内存溢出，也避免重复创建图片，引起性能问题。建议使用fresco(https://github.com/facebook/fresco)、Glide(https://github.com/bumptech/glide)等图片库。
+		正例：
+			例如使用系统LruCache缓存，参考：
+			https:/developer.android.com/topic/performance/graphics/cache-bitmap.html
+			private LruCache<String, Bitmap> mMemoryCache;
+			@Override
+			protected void onCreate(Bundle savedinstanceState) {
+				...
+				// 获取可用内存的最大值，使用内存超出这个值将抛出OutOfMemory异常。LruCache通过构造函数传入缓存之，以KB为单位。
+				final int maxMemory = (int) (Rumtime.getRuntime().maxMemory() / 1024);
+				// 把最大可用内存的1/8作为缓存空间
+				final int cacheSize = maxMemory / 8;
+				mMemoryCache = new LruCache<String, Bitmap>(cacheSzie) {
+					@Override
+					protected int sizeOf(String key, Bitmap bitmap) {
+						return bitmap.getByteCount() / 1024;
+					}
+				};
+				...
+			}
+
+			public void addBitmapToMemoryCache(String key, Bitmap bitmap) {
+				if (getBitmapFromMemCache(key) == null) {
+					mMemoryCache.put(key, bitmap);
+				}
+			}
+
+			public Bitmap getBitmapFromMemCache(String key) {
+				return mMemoryCache.get(key);
+			}
+
+			public void loadBitmap(int resId, ImageView imageView) {
+				final String imageKey = String.valueOf(resId);
+				final Bitmap bitamp = getBitmapFromMemCache(imageCache);
+				if (bitmap != null) {
+					mImageView.setImageBitamp(bitmap);
+				} else {
+					mImageView.setImageResource(R.drawable.image_placeholder);
+					BitmapWorkerTask task = new BitmapWorkerTask(mImageView);
+					task.execute(resId);
+				}
+			}
+
+			class BitmapWorkerTask extends AsyncTask<Integer, Void, Bitmpa> {
+				...
+				// 在后台进行图片解码
+				@Override
+				protected Bitmap doInBackground(Integer... params) {
+					final Bitmap bitmap = descodeSampledBitmapFromResource(getResources(), params[0], 100, 100);
+					addBitmapToMemoryCache(String.valueOf(params[0]), bitmap);
+					return bitmap;
+				}
+				...
+			}
+		反例：
+			没有存储，每次都需要解码，或者有缓存但是没有合适的淘汰机制，会导致缓存效果很差，依然经常需要重新编码。
+	3、png图片使用TingPNG或者类似工具压缩处理，减少包体积。
+	4、应根据实际展示需要，压缩图片，而不是直接显示原图。手机屏幕比较小，直接显示原图，并不会增加视觉上的收益，但是却会耗费大量宝贵的内存。
+		正例：
+			public static Bitmap decodeSampledBitmapFromResource(Resources res, int resId, int reqWidth, reqHeight) {
+				// 首先通过inJustDecodeBounds=true获得图片的尺寸
+				final BitmapFactory.Options options = new BitmapFactory.Options();
+				options.inJustDecodeBounds = true;
+				BitmapFactory.decodeResource(res, resId, options);
+				// 然后根据图片分辨率以及我们实际需要展示的大小，计算压缩率
+				options.inSampleSize = calculateInSampleSize(options, reqWidth, reqHeight);
+				// 设置压缩率，并解码
+				options.inJustDecodeBounds = false;
+				return BitmapFactory.decodeResource(res, resId, options);
+			}
+		反例：
+			不经压缩显示原图。
+	5、使用完毕的图片，应该及时回收，释放宝贵的内存。
+		正例：
+			Bitmap bitmap = null;
+			loadBitmapAsync(new OnResult(result) {
+				bitmap = result;
+			});
+			...使用该bitmap...
+			// 使用结束，在2.3.3及以下需要调用recycle()函数，在2.3.3以上GC会自动管理，除非你明确不需要再用。
+			if (Build.VERSION.SDK_INI <= Build.VERSION_CODES.GINGERBREAD_MAR1) {
+				bitmap.recycle();
+			}
+			bitmap = null;
+		反例：
+			使用完图片，始终不释放资源。
+	6、在Activity onPause或Activity onStop回调中，关闭当前activity正在执行的动画。
+		正例：
+			public class MyActivity extends Activity {
+				ImageView mImageView;
+				Animation mAnimation;
+				Button mBtn;
+
+				@Override
+				protected void onCreate(Bundle savedInstanceState) {
+					super.onCreate(savedInstanceState);
+					setContentView(R.layout.main);
+					mImageView = (ImageView) findViewById(R.id.ImageView01);
+					mAnimation = AnimationUtils.loadAnimation(this, R.anim.anim);
+					mBtn = (Button) findViewById(R.id.Button01);
+					mBtn.setOnClickListener(new View.OnClickListener() {
+						@Override
+						public void onClick(View v) {
+							mImageView.startAnimation(mAnimation);
+						}
+					})
+				}
+
+				@Override
+				protected void onPause() {
+					// 页面退出，及时清理动画资源
+					mImageView.clearAnimation();
+				}
+			}
+		反例：
+			页面退出时，不关闭该页面相关的动画。
+	7、在动画或者其他异步任务结束时，应该考虑回调时刻的环境是否还支持业务处理。例如Activity的onStop()函数已经执行，且在该函数中主动释放了资源，此刻回调中如果不做判断就会空指针崩溃。
+		正例：
+			public class MyActivity extends Activity {
+				private ImageView mImageView;
+				private Animation mAnimation;
+
+				@Override
+				public void onCreate(Bundle savedInsatnceState) {
+					super.onCreate(savedInstanceState);
+					setContentView(R.layout.main);
+					mImageView = (ImageView) findViewById(R.id.ImageView01);
+					mAnimation = AnimatinUtils.loadAnimation(this, R.anim.anim);
+					mAnimation.setAnimationListener(new AnimationListener() {
+						@Override
+						public void onAnimationEnd(Animation arg0) {
+							// 判断一下资源是否被释放了
+							if (mImageView != null) {
+								mImageView.clearAnimation();
+							}
+						}
+					});
+					mImageView.startAnimation(mAnimation);
+				}
+			}
+		反例：
+			动画结束回调中，直接使用资源不加判断，导致异常。
+	8、使用inBitmap重复利用内存空间，避免重复开辟新内存。
+		正例：
+			public static Bitmap decodeSampledbitmapFromFile(String filename, int reqWidth, int reqHeight, ImageCache cache) {
+				final BitmapFactory.Options options = new BitmapFactory.Options();
+				...
+				BitmapFactory.decodeFile(filename, options);
+				...
+				// 如果在Honeycomb或更新版本系统中运行，尝试使用inBitmap
+				if (Utils.hasHoneycomb) {
+					addInBitmapOptions(options, cache);
+				}
+				...
+				return BitmapFactory.decodeFile(filename, options);
+			}
+
+			public static void addInBitmapOptions(BitmapFactory.Options options, ImageCache cacge) {
+				// inBitmap只处理可变的位图，所以强制返回可变的位图
+				options.inMutable = true;
+				if (cache != null) {
+					Bitmap inBitmap = cache.getBitmapFromReusableSet(options);
+					if (inBitmap != null) {
+						options.inBitmap = inBitmap;
+					}
+				}
+			}
+	9、使用RGB_565代替RGB_888，在不怎么降低视觉效果的前提下，减少内存占用。
+		说明：
+			android.graphics.Bitmap.Config类中关于图片颜色的存储方式定义：
+				a. ALPHA_8代表8位Alpha位图；
+				b. ARGB_4444代表16位ARGB位图；
+				c. ARGB_8888代表32位ARGB位图；
+				d. RGB_565代表8位RGB位图。
+			位图位数越高，存储的颜色信息越多，图像也就越逼真。大多数场景使用的是ARGB_8888和RGB_565能够保证图片质量的情况下大大减少内存的开销，是解决OOM的一种方法。
+			但是一定要注意RGB_565是没有透明度的，如果图片本身需要保留透明度，那么就不能使用RGB_565。
+		正例：
+			Config config = drawableSave.getOpacity != PixelFormat.OPAQUE ? Config.ARGB_8888 : Config.RGB_565;
+			Bitmap bitmap = Bitmap.createBitmap(w, h, config);
+		 反例：
+		 	Bitmap bitmap = Bitmap.createBitmap(width, height, Config.ARGB_8888);
+	10、尽量减少Bitmap(BitmapDrawable)的使用，尽量使用纯色(ColorDrawable)、渐变色(GradientDrawable)、StateSelector(StateListDrawable)等于Shape结合的形式构建绘图。
+	11、谨慎使用gif图片，注意限制每个页面允许同时播放的gif图片，以及单个gif图片大小。
+	12、大图片资源不要直接打包到apk，可以考虑通过文件仓库远程下载，减小包体积。
+	13、根绝设备性能，选择性开启复杂动画，以实现一个整体较优的性能和体验。
+	14、在有强依赖onAnimationEnd回调的交互时，如动画播放完毕时才能操作页面，onAnimationEnd可能会因各种异常没被回调(参考：https://stackoverflow.com/questions/5474923/onanimationend-is-not-getting-called-onanimationstart-works-fine),建议加上超时保护或通过postDelay替代onAnimationEnd。
+		正例：
+			View v = findViewById(R.id.xxxViewId);
+			final FadeUpAnimation anim = new FadeUpAnimation(v);
+			anim.setInterpolator(new AccelerateInterpolator());
+			anim.setFillAfter(true);
+			new Handler().postDelayed(new Runnable() {
+				public void run() {
+					if (v != null) {
+						v.clearAnimation();
+					}
+				}
+			}, anim.getDuration());
+			v.startAnimation(anim);
+	15、当ViewAnimation执行结束时，调用View.clearAnimation()释放相关资源。
+		正例;
+			View v = findViewById(R.id.xxxViewID);
+			final FadeUpAnimation anim = new FadeUpAnimation(v);
+			anim.setInterpolator(new AccelerateInterpolator());
+			anim.setDuration(1000);
+			anim.setFillAfter(true);
+			anim.setAnimationListener(new AnimationListener() {
+				@Override
+				public void onAnimationEnd(Animation arg0) {
+					// 判断一下资源是否被释放了
+					if (v != null) {
+						v.clearAnimation();
+					}
+				}
+			});
+			v.startAnimation(anim);
