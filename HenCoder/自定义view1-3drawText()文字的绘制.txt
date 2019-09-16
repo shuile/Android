@@ -1,0 +1,109 @@
+1、Canvas绘制文字的方式
+	Canvas的文字绘制方法有三个：drawText()、drawTextRun()、drawTextOnPath()
+	1.1 drawText(String text, float x, float y, Paint paint)
+		drawText()是Canvas最基本的绘制文字的方法：给出文字的内容和位置，Canvas按要求去绘制文字。
+		方法的参数很简单：text是文本内容，x和y是文字的坐标。但需要注意：这个坐标并不是文字的左上角，而是一个与左下角比较接近的位置。y值指定的是基线的位置。
+			例：
+				String text = "Hello Hencoder!";
+				...
+				canvas.drawText(text, 200, 100, paint);
+	1.2 drawTextRun()
+		声明：这个方法对中国人没用。
+	1.3 drawTextOnPath()
+		沿着一条Path来绘制文字。
+			例：
+				canvas.drawPath(path, paint);
+				canvas.drawTextOnPath("Hello Hencoder", path, 0, 0, paint);
+		drawTextOnPath(String text, Path path, float hOffset, float vOffset, Paint paint)，参数里需要解释的只有两个。hOffset：文字相对于Path的水平偏移量，vOffset：文字相对于Path的竖直偏移量，利用它们调整文字的位置。
+	1.4 StaticLayout
+		这个也是使用Canvas来进行文字的绘制，不过并不是使用Canvas的方法。
+		Canvas.drawText()只能绘制单行的文字，而不能换行。
+			它不能在View的边缘自动拆行；
+			不能在换行符\n处换行；
+		如果需要绘制多行的文字，你必须自行把文字切断后分多次使用drawText()来绘制，或者一一使用StaticLayout。
+		StaticLayout并不是一个View或者ViewGroup，而是android.text.Layout的子类，它是纯粹用来绘制文字的。StaticLayout支持换行，它既可以为文字设置宽度上线来让文字自动换行，也会在\n处主动换行。
+			例：
+				String text1 = "Lorem Ipsum is simply dummy text of the printing and typesetting industry.";
+				StaticLayout staticLayout1 = new StaticLayout(text1, paint, 600, Layout.Alignment.ALIGN_NORMAL, 1, 0, true);
+				String text2 = "a\nbc\ndefghi\njklm\nnopqrst\nuvwx\nyz";
+				StaticLayout staticLayout2 = new StaticLayout(text2, paint, 600, Layout.Alignment.ALIGN_NORMAL, 1, 0, true);
+				...
+				canvas.save();
+				canvas.translate(59, 100);
+				staticLayout1.draw(canvas);
+				canvas.translate(0, 200);
+				staticLayout2.draw(canvas);
+				canvas.restore();
+			代码中出现的Canvas.save()、Canvas.translate()、Canvas.restore()配合起来可以对绘制的内容进行移动。
+		StaticLayout的构造方法是StaticLayout(CharSequence source, TextPaint paint, int width, Layout.Alignment align, float spacingnult, float spacingaddd, boolean icnludepad)，其中参数里：
+			width是文字区域的宽度，文字到达这个宽度后就会自动换行；
+			align是文字的对齐方向；
+			spacingmult是行间距的倍数，通常情况下填1就好；
+			spacingadd是行间距的额外增加值，通常情况下下填0就好；
+			includepad是指是否在文字上下添加额外的控件，来避免某些过高的字符的绘制出现越界。
+2、Paint对文字绘制的辅助
+	Paint对文字绘制的辅助，有两类方法：设置显示效果的和测量文字尺寸的。
+	2.1 设置显示效果类
+		2.1.1 setTextSize(float textSize)
+			设置文字大小
+		2.1.2 setTypeface(Typeface typeface)
+			设置字体
+		2.1.3 setFakeBoldText(boolean fakeBoldText)
+			是否使用伪粗体。之所以叫伪粗体，因为它并不是通过选用更高weight的字体让文字变粗，而是通过程序在运行时把文字给【描粗了。
+		2.1.4 setStrikeThruText(boolean strikeThruText)
+			是否加删除线。
+		2.1.5 setUnderlineText(boolean underlineText)
+			是否加下划线。
+		2.1.6 setTextSkewX(float skewX)
+			设置文字横向错切角度。其实就是文字倾斜度。
+		2.1.7 setTextScaleX(float scaleX)
+			设置文字横向放缩。也就是文字变胖变瘦。
+		2.1.8 setLetterSpacing(float letterSpacing)
+			设置字符间距。默认值时0.
+		2.1.9 setFontFeatureSettings(String settings)
+			用CSS的font-feature-settings的方式来设置文字。
+		2.1.10 setTextAlign(Paint.Align align)
+			设置文字的对齐方式。一共有三个值：LEFT、CENTER和RIGHT。默认值为LEFT。
+		2.1.11 setTextLocale(Locale locale) / setTextLocales(LocaleList locales)
+			设置绘制所使用的Locale。
+		2.1.12 setHinting(int mode)
+			设置是否启用字体的hinting(字体微调)。
+			hinting技术就是为了解决文字尺寸过小时会由于失去过多细节而变得不太好看：通过向字体中加入hinting信息，让矢量字体在尺寸过小的时候得到针对性的修正，从而提高显示效果。
+		2.1.13 setElegantTextHeight(boolean elegant)
+			声明：这个方法对中国人没用。
+			设置是否开启文字的elegant height。
+		2.1.14 setSubpixelText(boolean subpixelText)
+			是否开启次像素级的抗锯齿。简单说就是根据程序所运行的设备的屏幕类型，来进行针对性的次像素级的抗锯齿计算，从而达到更好的抗锯齿效果。
+		2.1.15 setLinearText(boolean linearText)
+			？？？
+	2.2 测量文字尺寸类
+		2.2.1 float getFontSpacing()
+			获取推荐的行距。即推荐的两行文字的baseline的距离。这个值时系统根据文字的字体和字号自动计算的。它的作用是放你要手动绘制多行文字(而不是使用StaticLayout)的时候，可以在换行的时候给y坐标加上这个值来下移文字。
+		2.2.2 FontMetrics getFontMetrics()
+			获取Paint的FontMetrics。FontMetrics提供了几个文字排印方面的数值：ascent、dscent、top、bottom、leading。
+				baseline：作用是作为文字显示的基准线。
+				ascent/dscent：作用是限制普通字符的顶部和底部范围。
+				top/bottom：作用是限制所有字形的顶部和底部范围。
+				leading：指的是行的额外间距，即对于上下相邻的两行，上行的bottom线和下行的top线的距离。
+			另外ascent、dscent还可以通过Paint.ascent()和Paint.dscent()来快捷获取。
+		2.2.3 getTextBounds(String text, int start, int end, Rect bounds)
+			获取文字的显示范围。参数里，text是要测量的文字，start和end分别是文字的起始和结束位置，bounds是存储文字显示范围的对象，方法在测算完成之后会把结果写进bounds。
+		2.2.4 float measureText(String text)
+			测量文字的宽度并返回。
+			注：
+				getTextBounds：它测量的是文字的显示范围(关键词：显示)。
+				measureText()：它测量的是文字绘制时所占用的宽度(关键词：占用)。
+		2.2.5 getTextWidth(String text, float[] widths)
+			获取字符串中每个字符的宽度，并把结果填入参数widths。
+		2.2.6 int breakText(String text, boolean measureForwards, float maxWidth, float[] measuredWidth)
+			这个方法也是用来测量文字宽度的。但和measureText()的区别是，breakText()是在给出宽度上限的前提下测量文字的宽度。如果文字的宽度超出了上限，那么在临近超限的位置截断文字。
+			breakText()的返回值是截取的文字个数(如果宽度没有超限，则是文字的总个数)。参数中，text是要测量的文字；measureForwards表示文字的测量方向，true表示由左往右测量；maxWidth是给出的宽度上线；measuredWidth是用于接收数据，而不是用于提供数据的：方法测量完成后会把截取的文字宽度赋值给measuredWidth[0]。
+		2.2.7 光标相关
+			2.2.7.1 getRunAdvance(CharSequence text, int start, int end, int contextStart, int contextEnd, boolean isRtl, int offset)
+				对于一段文字，计算出某个字符处光标的x坐标。start end是文字的起始和结束坐标；contextStart contextEnd是上下文的起始和结束坐标；isRtl是文字的方向；offset是字数的偏移，即计算第几个字符处的光标。
+			2.2.7.2 getOffsetForAdvance(CharSequence text, int start, int end, int contextStart, int contextEnd, boolean isRtl, float advance)
+				给出一个位置的像素值，计算出文字中最接近这个位置的字符偏移量(即第几个字符最接近这个坐标)。
+				参数：text是要测量的文字；start end是文字的起始和结束坐标；contextStart contextEnd是上下文的起始和结束坐标；isRtl是文字方向；advance是给出的位置的像素值。填入参数，对应的字符偏移量将作为返回值返回。
+				getOffsetForAdvance()配合上getRunAdvance()一起使用，就可以实现[获取用户点击的文字坐标]的需求。
+		2.2.8 hasGlyph(String strine)
+			检查指定的字符串会搜福是一个单独的字形。最简单的情况是，string只有一个字母。

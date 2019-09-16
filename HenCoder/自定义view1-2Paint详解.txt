@@ -1,4 +1,252 @@
-1、颜色
-	基本颜色
-		直接设置颜色
+1. 颜色
+	1.1 基本颜色
+		1.1.1 直接设置颜色
 			setColor(int color)
+			setARGB(int a, int r, int g, int b)
+		1.1.2 设置Shader setShader(Shader shader) 
+			除了直接设置颜色，Paint还可以使用Shader。
+			Shader子类：LinearGradient、RadialGradient、SWeepGradient、BitmapShader、ComposeShader。
+			1.1.2.1 LinearGradient线性渐变
+				设置连个点和两种颜色，以这两个点作为端点，使用两种颜色的渐变来绘制颜色。
+					例：
+						Shader shader = new LinearGradient(100, 100, 500, 500, Color.parseColor("#E91E63"), Color.parseColor("#2196F3"), Shader.TileMode.CLAMP);
+						paint.setShader(shader);
+						...
+						canvase.drawCircle(300, 300, 200, paint);
+			1.1.2.2 RadialGradient 辐射渐变
+				辐射渐变很好理解，就是从中心向周围辐射的渐变。
+					例：
+						Shader shader = new RadialGradient(300, 300, 200, Color.parseColor("#E91E63"), Color.parseColor("#2196F3"), Shader.TileMode>CLAMP);
+						paint.setShader(shader);
+						...
+						canvas.drawCircle(300, 300, 200, paint);
+			1.1.2.3 SweepGradient 扫描渐变
+				例：
+					Shader shader = new SweepGradient(300, 300, Color.parseColor("#E91E63"), Color.parseColor("#2196F3"));
+					paint.setSahder(shader);
+					...
+					canvas.drawCircle(300, 300, 200, paint);
+			1.1.2.4 BitmapShader
+				用BItmap来着色，其实就是用BItmap的像素来作为图形或文字的填充。
+					例：
+						Bitmap bitmap = BitmapFactory.decodeResource(getResource(), R.drawable.batman);
+						Shader shader = new BitmapShader(bitmap, Shader.TileMode.CLAMP, Shade.TileMode.CLAMP);
+						paint.setShader(shader);
+						...
+						canvas.drawCircle(300, 300, 200, paint);
+			1.1.2.5 ComposeShader 混合着色器
+				所谓混合，就是把两个Shader一起使用。
+				例：
+					// 第一个Shader：头像的Bitmap
+					Bitmap bitmap1 = BitmapFactory.decodeResource(getResource(), R.drawable.batman);
+					Shader shader1 = new BitmapShader(bitmap1, Shader.TileMode.CLAMP, Shader.TileMode.CLAMP);
+
+					// 第二个Shader：从上到下的线性渐变（由透明到黑色）
+					Bitmap bitmap2 = BitmapFactory.decoderesource(getResource(), R.drawable.batman_logo);
+					Shader shader2 = new BitmapShader(shader2, Shader.TileMode.CLAMP, Shader.TileMode.CLAMP);
+
+					// ComposeShader：结合两个Shader
+					Shader shader = new ComposeShader(shader1, shader2, PorterDuff.Mode.SRC_OVER);
+					paint.setShader(shader);
+					...
+					canvas.drawCircle(300, 300, 300, paint);
+	1.2 setColorFilter(ColorFilter colorFilter)
+		Paint对颜色的第二层处理：通过setColorFilter(colorFilter)来加工颜色。
+		ColorFilter:为绘制设置颜色过滤，就是为绘制的内容设置一个统一的过滤策略。
+		ColorFilter子类：LightingColorFilter、PorterDuffColorFilter和ColorMatrixColorFilter。
+		1.2.1 LightingColorFilter
+			用来模拟简单的光照效果。
+			构造方法为LightingColorFilter(int mul, int add)，参数里的mul和add都是和颜色值格式相同的int值，其中mul用来和目标像素相乘，add用来和目标像素想加：
+				R' = R * mul.R / 0xff + add.R
+				G' = G * mul.G / 0xff + add.G
+				B' = B * mul.B / 0xff + add.B
+			例：
+				ColorFilter lightingColorFilter = new LightingColorFilter(0x00ffff, 0x000000);
+				paint.setColorFilter(lightingColorFilter);
+		1.2.2 PorterDuffColorFilter
+			作用是使用一个指定的颜色和一种指定的PorterDuff.Mode来与绘制对象进行合成。
+			构造方法为PorterDuffColorFilter(int color, PorterDuff.Mode mode)其中color参数是指定的颜色额，mode参数是指定的Mode。
+		1.2.3 ColorMatrixColorFilter
+			ColorMatrixColorFilter使用一个ColorMatrix来对颜色进行处理。ColorMatrix这个类，内部是一个4x5的矩阵：
+				[ a, b, c, d, e,
+				  f, g, h, i, j,
+				  k, l, m, n, o,
+				  p, q, r, s, t ]
+			通过计算，ColorMatrix可以把绘制的像素进行转换。转换算法未：
+				R' = a * R + b * G + c * B + d * A + e;
+				G' = f * R + g * G + h * B + i * A + j;
+				B' = k * R + l * G + m * B + n * A + o;
+				A' = p * R + q * G + r * B + s * A + t;
+	1.3 setXfermode(Xfermode xfermode)
+		"Xfermode"其实就是"Transfer mode"，用"X"来代替"Trans"是一些美国人喜欢用的简写方式。严格地讲，Xfermode指的是你要绘制的内容和Canvas的目标位置的内容应该怎样结合计算出最终的颜色。但通俗地说，其实就是要你以绘制的内容作为图像源，以View中已有的内容作为目标图像，选取一个PorterDuff.Mode作为绘制内容的颜色处理方案。
+			例：
+				Xfermode xfermode = new PorterDuffXfermode(PorterDuff.Mode.DST_IN);
+				...
+				canvas.drawBitmap(rectBitmap, 0, 0, paint); // 画方
+				paint.setXfermode(xfermode);	// 设置 Xfermode
+				canvas.drawBitmap(circleBitmap, 0, 0, paint); // 画圆
+				paint.setXfermode(null);	// 用完及时清除 Xfermode
+		Xfermode注意事项：
+			1、使用离屏缓冲(Off-screen Buffer)
+				要想使用setXfermode()正常绘制，必须使用离屏缓冲(Off-screen Buffer)把内容绘制在额外的层上，再把绘制好的内容贴回View中。
+				通过离屏缓冲，把要把绘制的内容单独绘制在缓冲层，Xfermode的使用就不会出现奇怪的结果了。使用离屏缓冲有两种方式：
+					Canvas.saveLayer()
+						saveLayer()可以做短时的离屏缓冲。使用方法很简单，在绘制代码的前后各加一行代码，在绘制之前保存，绘制之后恢复：
+							int saved = canvas.saveLayer(null, null, Canvas.ALL_SAVE_FLAG);
+
+							canvas.drawBitmap(rectBitmap, 0, 0, paint);	// 画方
+							paint.setXfermode(xfermode);	// 设置Xfermode
+							canvas.drawBitmap(circleBitmap, 0, 0, paint);	// 画圆
+							paint.setXfermode(null);	// 用完及时清除Xfermode
+
+							canvas.restoreToCount(saved);
+					View.setLayerType()
+						View.setLayerType()是直接把整个View都绘制在离屏缓冲中。
+						setLayerType(LAYER_TYPE_HARDWARE)是使用GPU来缓冲，
+						setLayerType(LAYER_TYPE_SOFTWARE)是直接用一个Bitmap来缓冲。
+			2、控制好透明区域
+				使用Xfermode来绘制的内容除了注意使用离屏缓冲，还应该注意控制它的透明度区域不要太小，要让它足够覆盖到要和它结合绘制的内容，否则得到的结果很可能不是你想要的。
+2、效果
+	效果类的API，指的就是抗锯齿、填充/轮廓、线条宽度等。
+	2.1 设置抗锯齿 setAntiAlias(boolean aa)
+		抗锯齿默认是关闭的，如果需要抗锯齿，需要显式地打开。
+	2.2 setStyle(Paint.Style style)
+		用来设置图形是线条风格还是填充风格。（也可二者并用）
+		模式：Paint.Style.FILL, Paint.Style.STROKE, FILL_AND_STROKE
+		FILL模式是默认模式。
+	2.3 线条状态
+		设置线条形状一共有4个方法：
+		2.3.1 setStrokeWidth(float width)
+			设置线条宽度。单位为像素，默认值是0.
+			线条宽度0和1的区别：
+				默认情况下，线条宽度为0，但是此时依然能画出线，线条宽度为1像素。线条宽度为0不会随着几何变换被放大。
+		2.3.2 setStrokeCap(Paint.Cap cap)
+			设置线头的形状。线头形状有三种：BUTT平头、ROUND圆头、SQUARE方头。默认为BUTT平头。
+		2.3.3 setStrokeJoin(Paint.Join join)
+			设置拐角的形状。有三个值可以选择：MITER尖角、BEVEL平角和ROUND圆角。默认为MITER尖角。
+		2.3.4 setStrokeMiter(float miter)
+			这个方法是对于setStrokeJoin()的一个补充，它用于设置MITER型拐角的延长线的最大值。
+	2.4 色彩优化
+		Paint的色彩优化有两个方法：setDither(boolean dither)和setFilterBitmap(boolean filter)。它们的作用都是让画面颜色变得更加顺眼，但原理和使用场景是不同的。
+		setDither(dither)，设置抖动来优化色彩深度降低时的绘制效果；setFilterBitmap(filterBitmap)，设置双线性过滤来优化Bitmap放大绘制的效果。
+		2.4.1 setDither(boolean dither)
+			设置图像的抖动。
+			paint.setDither(true);
+		2.4.2 setFilterBitmap(boolean filter)
+			设置是否使用双线性过滤来绘制Bitmap。
+			paint.setFilterBitmap(true);
+	2.5 setPathEffect(PathEffect effect)
+		使用PathEffect来给图形的轮廓设置效果。对Canvas所有的图形绘制有效，也就是drawLine()、drawCircle()、drawPath()这些方法。
+			例：
+				PathEffect pathEffect = new DashPathEffect(new float[]{10, 5}, 10);
+				paint.setPathEffect(pathEffect);
+				...
+				canvas.drawCircle(300, 300, 200, paint);
+		Android一共有6中PathEffect，并且分为两类。单一效果：CornerPathEffect、DiscretePathEffect、DashPathEffect、PathDashPathEffect；组合效果：SumPathEffect、ComposePathEffect。
+		2.5.1 CornerPathEffect
+			把所有拐角变成圆角。
+			构造方法：CornerPathEffect(float radius)的参数radius是圆角的半径。
+				例：
+					PathEffect pathEffect = new CornerPathEffect(20);
+					paint.setPathEffect(pathEffect);
+					...
+					canvas.drawPath(path, paint);
+		2.5.2 DiscretePathEffect
+			把线条进行随机的偏离，让轮廓变得乱七八糟。
+			构造方法：DiscretePathEffect(float segmentLength, float deviation)的两个参数中，segmentLength是用来拼接的每个线段的长度，deviation是偏离量。
+				例：
+					PathEffect pathEffect = new DiscretePathEffect(20, 5);
+					paint.setPathEffect(pathEffect);
+					...
+					canvas.drawPath(path, paint);
+		2.5.3 DashPathEffect
+			使用虚线来绘制线条。
+			构造方法：DashPathEffect(float[] intervals, float phase)中，第一个参数intervals是一个数组，它制定了虚线的格式：数组中元素必须为偶数(最少是2个)，按照[画线长度、空白长度、画线长度、空白长度]...的顺序排列；第二个参数phase是虚线的偏移量。
+				例：
+					PathEffect pathEffect = new DashPathEffect(new float[]{20, 10, 5, 10}, 0);
+					paint.setPathEffect(pathEffect);
+					...
+					canvas.drawPath(path, paint);
+		2.5.4 PathDashPathEffect
+			使用一个Path来绘制虚线。
+			构造方法：PathDashPathEffect(Path shape, float advance, float phase, PathDashPathEffect.Style style)中，shape参数是用来绘制的Path；advance是两个相邻的shape段之间的间隔，这个间隔是两个shape段的起点的间隔；phase和DashPathEffect中一样，是虚线的偏移量；最后一个参数style，是用来指定拐弯改变的时候shape的转换方式。style的类型为PathDashPathEffect.Style，是一个enum，具体为三个值：TRANSLATE(位移)、ROTATE(旋转)、MORPH(变体)。
+				例：
+					Path dashPath = ...;	// 使用一个三角形来做 dash
+					PathEffect pathEffect = new PathDashPathEffect(dashPath, 40, 0, PathDashPathEffectStyle.TRANSLATE);
+					paint.setPathEffect(pathEffect);
+					...
+					canvas.drawPath(path, paint);
+		2.5.5 SumPathEffect
+			这是一个组合效果类的PathEffect，就是分别按照两种PathEffect分别对目标进行绘制。
+				例：
+					PathEffect dashEffect = new DashPathEffect(new float[]{20, 10}, 0);
+					PathEffect discreteEffect = new DiscretePathEffect(20, 5);
+					pathEffect = new SumPathEffect(dashEffect, discreteEffect);
+					...
+					canvas.drawPath(path, paint);
+		2.5.6 ComposePathEffect
+			这样是一个组合效果类的PathEffect。不过它是先对目标Path使用一个PathEffect，然后再对这个改变后的Path使用另一个PathEffect。
+			构造方法：ComposePathEffect(PathEffect outerpe, PathEffect innerpe)中的两个PathEffect参数，interpe是先应用的，outerpe是后应用的
+				例：
+					PathEffect pathEffect = new DashPathEffect(new float[]{20, 10}, 0);
+					PathEffect discreteEffect = new DiscretePathEffect(20, 5);
+					pathEffect = new ComposePathEffect(dashEffect, discreteEffect);
+					...
+					canvas.drawPath(path, paint);
+	注意：PathEffect在有些情况下不支持硬件加速，需要关闭硬件加速才能正常使用：
+		1、Canvas.drawLine()和Canvas.drawLines()方法画直线时，setPathEffect()是不支持硬件加速的；
+		2、PathDashPathEffect对硬件加速的支持也有问题，所以当使用PathDashPathEffect的时候，最好也把硬件加速关了。
+	剩下的两个效果类方法：setShadowLayer()和setMaskFilter()，它们和前面的效果类方法有点不一样：它们设置的是[附加效果]，也就是基于在绘制内容的额外效果。
+	2.6 setShadowLayer(float radius, float dx, float dy, int shadowColor)
+		在之后的绘制内容下面加一层阴影。方法的参数里，radius是阴影的模糊范围，dx、dy是阴影的偏移量，shadowColor是阴影的颜色。
+			例：
+				paint.setShadowLayer(10, 0, 0, Color,RED);
+				...
+				canvas.drawText(text, 80, 300, paint);
+		如果要清除阴影层，使用clearShadowLayer()
+		注意：
+			在硬件加速的情况下，setShadowLayer()只支持文字的绘制，文字之外的绘制必须关闭硬件加速才能正常绘制阴影。
+			如果shadowColor是半透明的，阴影的透明度就使用shadowColor自己的透明度；而如果shadowColor是不透明的，阴影的透明度就是使用paint的透明度。
+	2.7 setMaskFilter(MaskFilter maskfilter)
+		为之后的绘制设置MaskFilter。设置的是绘制层上方的附加效果。
+		到现在已经有两个setXxxFilter(filter)了。前面有一个setColorFilter(filter)，是对每个像素的颜色进行过滤；而这里的setMaskFilter(filter则是基于整个画面来进行过滤。
+		MaskFilter有两种：BlurMaskFilter和EmbossMaskFilter。
+		2.7.1 BlurMaskFilter
+			模糊效果的MaskFilter。
+			它的构造方法BlurMaskFilter(float radius, BlurMaskFilter.Blur style)中，radius参数是模糊的范围，style是模糊的类型。一共有四种：NORMAL(内外都模糊绘制)、SOLID(内部正常绘制，外部模糊)、INNER(内部模糊，外部不绘制)、OUTER(内部不绘制，外部模糊)
+				例：
+					paint.setMaskFilter(new blurMaskFilter(50, BlurMaskFilter.Blur.NORMAL));
+					...
+					canvas.drawBitmap(bitmap, 100, 100, paint);
+		2.7.2 EmbossMaskFilter
+			浮雕效果的MaskFilter。
+			构造方法：EmbossMaskFilter(float[] direction, float ambient, float specular, float blurRadius)的参数里，direction是一个3个元素的数组，指定了光源的方向；ambient是环境光的强度，数值范围是0到1；specular是炫光的系数；blurRadius是应用光线的范围。
+				例：
+					paint.setMakFilter(new EmbossMaskFilter(new float[]{0, 1, 1}, 0.2f, 8, 19));
+					...
+					canvas.drawBitmap(bitmap, 100, 100, paint);
+	2.8 获取绘制的Path
+		这是效果类的最后一组方法，也是效果类唯一的一组get方法。
+		这组方法做的事事，根据paint的设置，计算出绘制Path或文字时实际Path。
+		2.8.1 getFillPath(Path src, Path dst)
+			实际Path，指的就是drawPath()的绘制内容的轮廓，要算上线条宽度和设置的PathEffect。
+			默认情况下(线条宽度为0、没有PathEffect)，原Path和实际Path是一样的；而在线条宽度不为0(并且模式为STROKE模式或FILL_AND_STROKE)，或者设置了PathEffect的时候，实际Path就和原Path不一样了。
+		2.8.2 getTextPath(String text, int start, int end, float x, float y, Path path) / getTextPath(char[] text, int index, int count, float x, float y, Path path)
+			文字的Path，文字的绘制，虽然是使用Canvas.drawText()方法，但其实在下层，文字信息全是被转换成图形，对图形进行绘制的。getTextPath()方法，获取的就是目标文字所对应的Path。
+3、drawText()相关
+	Paint有些设置是文字绘制相关的，即和drawText()相关。
+4、初始化类
+	这一类方法很简单，它们是用来初始化Paint对象，或者批量设置Paint的多个属性的方法。
+	4.1 reset()
+		重置paint的所有属性为默认值。
+	4.2 set(Paint src)
+		把src的所有属性全部复制过来。相当于调用src所有的get方法，然后调用这个Paint的对应的set方法来设置它们。
+	4.3 setFlags(int flags)
+		批量设置flags。相当于一次调用它们的set方法。
+			例：
+				paint.setMaskfilter(new EmbossMaskFilter(new float[]{0, 1, 1}, 0.2f, 8, 10));
+				...
+				canvas.drawBitmap(bitmap, 100, 100, paint);
+			这行代码，和下面这两行是等价的：
+				paint.setAntiAlias(true);
+				paint.setDither(true);

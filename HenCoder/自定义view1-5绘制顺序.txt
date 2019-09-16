@@ -1,0 +1,45 @@
+1、super.onDraw()前or后？
+	1.1 写在super.onDraw()的下面
+		把绘制代码写在super.onDraw()的下面，由于绘制代码会在原有内容绘制结束之后才执行，所以绘制内容就会盖住控件原来的内容。
+	1.2 写在super.onDraw()的上面
+		如果吧绘制代码写在super.onDraw()的上面，由于绘制代码会执行在原有内容的绘制之前，所以绘制的内容会被控件的原内容盖住。
+2、dispatchDraw()：绘制子View的方法
+	2.1 写在super.dispatchDraw()下面
+		只要重写dispatchDraw()，并在super.dispatchDraw()的下面写上你的绘制代码，这段绘制代码就会发生在子View的绘制之后，从而让绘制内容盖住子View了。
+	2.2 写在super.dispatchDraw()的上面
+3、绘制过程简述
+	一个完成的绘制构成依次绘制以下几个内容：
+		1. 背景
+		2. 主体(onDraw())
+		3. 子View(dispatchDraw())
+		4. 滑动边缘渐变和滑动条
+		5. 前景
+	2、3两步前面已经讲过了；第1步--背景，它的绘制发生在一个叫drawBackground()的方法里，但这个方法是private的，不能重写，你如果要设置背景，只要用自带的API去设置(xml布局文件的android:background属性以及Java代码的view.setBackgroundXxx()方法)，而不能自定义绘制；而第4、5步--滑动边缘渐变和滑动条以及前景，这两部分被合在一起放在了onDrawForegorung()方法里，这个方法是可以重写的。
+	滑动边缘渐变和滑动条可以通过xml的android:scrollbarXXX系列属性或Java代码的View.setXXXScrollbarXXX()系列方法来设置；前景可以通过xml的android:foreground属性或Java代码的View.setForeground()方法来设置。而重写onDrawForeground()方法，并在它的super.onDrawForeground()方法的上面或下面插入绘制代码，则可以控制内容和滑动边缘渐变、滑动条以及前景的遮盖关系。
+4、onDrawForegroud()
+	4.1 写在super.onDrawForeground()的下面
+		如果你把绘制代码写在了super.onDrawForeground()的下面，绘制代码会在滑动边缘渐变、滑动条和前景之后被执行，那么绘制内容将会盖住滑动边缘渐变、滑动条和前景。
+	4.2 写在super.onDrawForefround()的上面
+		如果你把绘制代码写在了super.onDrawForeground()的上面，绘制内容就会在dispatchDraw()和super.onDrawForeground()之间执行，那么绘制内容会盖住子View，但被滑动边缘渐变、滑动条以及前景盖住。
+	4.3 想在滑动边缘渐变、滑动条和前景之间插入绘制代码？
+		不行！！！
+5、draw()总调度方法
+	draw()是绘制过程的总调度方法。一个View的整个绘制过程都发生在draw()方法里。前面讲到的背景、主体、子View、滑动相关以及前景的绘制，它们其实都是在draw()方法里的。
+		例：
+			public void draw(Canvas canvas) {
+				...
+				drawBackground(canvas);	// 绘制背景(不能重写)
+				onDraw(canvas);	// 绘制主体
+				dispatchDraw(canvas);	// 绘制子View
+				onDrawForeground(canvas);	// 绘制滑动相关和前景
+				...
+			}
+	5.1 写在super.draw()的下面
+		由于draw()是总调度，所以如果把绘制代码写在super.draw()的下面，那么这段代码会在其他所有绘制完成之后再执行，也就是说，它的绘制内容会盖住其他所有绘制内容。
+	5.2 写在super.draw()的上面
+		由于draw()是总调度方法，所以如果把绘制代码写在super.draw()的上面，那么这段代码会在其他所有绘制之前被执行，所以这部分绘制内容会被其他所有的内容盖住，包括北京。
+
+注意：
+	1、出于效率的考虑，ViewGroup默认胡会绕过draw()方法，换而直接执行dispatchDraw()，以此来简化绘制流程。所以如果你自定义了某个ViewGroup的子类并且需要在它的除dispatchDraw()以外的任何一个绘制方法内绘制内容，你可能会需要调用View.setWillNotDraw(false)这行代码来切换到完整的绘制流程(是[可能]而不是[必须]的原因是，有些ViewGroup是已经调用过setWillNotDraw(false)了的，例如ScrollView)。
+	2、有的时候，一段绘制代码写在不同的绘制方法中效果是一样的，这时你可以选一个自己喜欢或者习惯的绘制方法来重写。但有一个例外：如果绘制代码既可以写在onDraw()里，也可以写在其他绘制方法里，那么优先写在onDraw()，因为Android有相关的优化，可以不需要重回的时候自动跳过onDraw()的重复执行，以提升开发效率。享受这种优化的只有onDraw()一个方法。
+	

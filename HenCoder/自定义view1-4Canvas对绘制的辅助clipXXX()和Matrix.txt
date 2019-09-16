@@ -1,0 +1,118 @@
+1、范围裁切
+	1.1 clipRect()
+		例：
+			canvas.save();
+			canvas.clipRect(left, top, right, bottom);
+			canvas.drawBitmap(bitmap, x, y, paint);
+			canvas.restore();
+		记得要加上Canvas.save()和Canvas.restore()。
+	1.2 clipPath()
+		例：
+			canvas.save();
+			canvas.clipPath(path1);
+			canvas.drawBitmap(bitmap, point1.x, point1.y, paint);
+			canvas.restore();
+
+			canvas.save();
+			canvas.clipPath(path2);
+			canvas.drawBitmap(bitmap, point2.x, point2.y, paint);
+			canvas.restore();
+2、几何变换
+	三类：
+		a. 使用Canvas来做常见的二维变换；
+		b. 使用Matrix来做常见和不常见的二维变换；
+		c. 使用Camera来做三维变换。
+	2.1 使用Canvas来做常见的二维变换
+		2.1.1 Canvas.translate(float dx, float dy)平移
+			参数里的dx和dy表示横向和纵向的位移。
+			例：
+				canvas.save();
+				canvas.translate(200, 0);
+				canvas.drawBitmap(bitmap, x, y, paint);
+				canvas.restore();
+		2.1.2 Canvas.rotate(float degrees, float px, float py)旋转
+			参数里的degrees是旋转角度，单位是读，方向是顺时针为正向；px和py是轴心的位置。
+			例：
+				canvas.save();
+				canvas.rotate(45, centerX, centerY);
+				canvas.drawBitmap(bitmap, x, y, paint);
+				canvas.restore();
+		2.1.3 Canvas.scale(float sx, float sy, float px, float py)放缩
+			参数里的sx sy是横向和纵向的放缩倍数；px和py是放缩的轴心。
+			例：
+				canvas.save();
+				canvas.scale(1.3f, 1.3f, x + bitmapWidth / 2, y + bitmapHeight / 2);
+				canvas.drawBitmap(bitmap, x, y, paint);
+				canvas.restore();
+		2.1.4 Canvas.skew(float sx, float sy)错切
+			参数里的sx和sy是x方向和y方向的错切系数。
+			例：
+				canvas.save();
+				canvas.skew(0, 0.5f);
+				canvas.drawBitmap(bitmap, x, y, paint);
+				canvas.restore();
+	2.2 使用Matrix来做变换
+		2.2.1 使用Matrix来做常见变换
+			Matrix做常见变换的方式
+				a. 创建Matrix对象；
+				b. 调用Matrix的pre/postTranslate/Rotate/Scale/Skew()方法来设置几何变换；
+				c. 使用Canvas.setMatrix(matrix)或Canvas.concat(matrix)来把几何变换应用到Canvas。
+			例：
+				Matrix matrix = new Matrix();
+				...
+				matrix.reset();
+				matrix.postTranslate();
+				matrix.preTranslate();
+
+				canvas.save();
+				canvas.concat(matrix);
+				canvas.drawBitmap(bitmap, x, y, paint);
+				canvas.restore();
+			把Matrix应用到Canvas的两个方法：
+				a. Canvas.setMatrix(matrix)：用Matrix直接替换Canvas当前的变换矩阵，即抛弃Canvas当前的变换，改用Matrix的变换；
+				b. Canvas.concat(matrix)：用Canvas当前的变换矩阵和Matrix相乘，即基于Canvas当前的变换，叠加上Matrix中的变换。
+		2.2.2 使用Matrix来做自定义变换
+			Matrix的自定义变换使用的是setPolyToPoly()方法。
+			2.2.2.1 Matrix.setPolyToPoly(float[] src, int srcIndex, float[] dst, int dstIndex, int pointCount)用点对点映射的方式设置变换
+				作用就是通过多点映射的方式来直接设置变换。[多点映射]的意思就是把指定的点移动到给出的位置，从而发生形变。
+				参数里，src和dst是源点集合目标点集；srcIndex和dstIndex是第一个点的偏移；pointCount是采集的点的个数(个数不能大于4，因为大于4个点就无法计算变换了)。
+				例：
+					Matrix matrix = new Matrix();
+					float pointsSrc = {left, top, right, top, left, bottom, right, bottom};
+					float pointsDst = {left - 10, top + 50, right +120, top - 90, left + 20, bottom + 30, right + 20, bottom + 60};
+					...
+					matrix.reset();
+					matrix.setPolyToPoly(pointsSrc, 0, pointsDst, 0, 4);
+
+					canvas.save();
+					canvas.concat(matrix);
+					canvas.drawBitmap(bitmap, x, y, paint);
+					canvas.restore();
+	2.3 使用Camera来做三位变换
+		Camera的三围变换有三类：旋转、平移、移动相机。
+		2.3.1 Camera.rotate*()三位旋转
+			Camera.rotate*()一共有四个方法：rotateX(deg)、rotateY(deg)、rotateZ(deg)、rotate(x, y, z)。
+			例：
+				canvas.save();
+				camera.rotateX(30);	// 旋转 Camera的三维空间
+				camera.applyToCanvas(canvas);	// 把旋转投影到Canvas
+				canvas.drawBitmap(bitmap, point1.x, point1.y, paint);
+				canvas.restore();	// 恢复Camera的状态
+				canvas.drawBitmap(bitmap, point1.x, point1.y, paint);
+				canvas.restore();
+			如果你需要图形左右对称，需要配合上Canvas.translate()，在三围旋转之前把绘制内容的中心点移动到原点，即旋转的中心，然后在三围旋转后再把投影移动回来。
+			例：
+				canvas.save();
+				camera.save();	// 保存Camera的状态
+				camera.rotateX(30);	// 旋转Camera的三维空间
+				canvas.translate(centerX, centerY);	// 旋转之后把投影移动回来
+				camera.applyToCanvas(canvas);	// 把旋转投影到Canvas
+				canvas.translate(-centerX, -centerY);	// 旋转之前把绘制内容移动到轴心(原点)
+				camera.restore();	// 恢复Camera的状态
+				canvas.drawBitmap(bitmap, point1.x, point1.y, paint);
+				canvas.restore();
+			Canvas的几何变换顺序是反的，所以要把移动到中心的代码写在下面，把从中心移动回来的代码写在上面。
+		2.3.2 Camera.translate(float x, float y, float x) 移动
+			使用方式与Camera.rotate*()相同。
+		2.3.3 Camera.setLocation(x, y, z)设置虚拟相机的位置
+			注意：参数的单位不是像素，而是英寸(inch)。
