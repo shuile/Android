@@ -1,0 +1,1 @@
+include ':app', ':testbinder', ':sdk_base'

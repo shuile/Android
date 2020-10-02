@@ -1,0 +1,24 @@
+1、ListView GridView RecyclerView CardView分别是什么，用来作什么？在哪些场景下使用？
+ListView：显示列表
+GridView：显示网格列表
+RecyclerView：列表组件
+CradView：视图，可嵌在前面列表中使用
+
+2、如何自定义一个Adapter？ListView如何复用优化？
+继承BaseAdapter
+
+3、如果有需求需要ScrollView中添加listView怎么办？
+listview加header和footer
+
+4、有使用listview的header和footer
+
+5、gridview和listview有什么区别，有哪些不同于listview的用法？
+分列、gridview没有实现header和footer
+
+6、listview分页加载的原理是什么？
+
+7、为什么要推出RecyclerView？相比于前listview和gridview有什么不同？
+中和listview和gridview，且可局部刷新
+
+8、Google基于什么原因推出CardView？怎么使用？有什么注意事项？
+Android 5.0版本前后区别
