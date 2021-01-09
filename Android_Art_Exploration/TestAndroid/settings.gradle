@@ -1,1 +1,5 @@
-include ':app', ':testbinder', ':sdk_base'
+include ':testndk'
+include ':testview'
+include ':app'
+include ':testbinder'
+include ':sdk_base'

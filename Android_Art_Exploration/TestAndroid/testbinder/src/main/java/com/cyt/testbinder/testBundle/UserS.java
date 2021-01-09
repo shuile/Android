@@ -9,9 +9,12 @@ public class UserS implements Serializable {
 
     private static final long serialVersionUID = 519067123721295773L;
 
-    int userId;
-    String userName;
-    boolean isMale;
+    public int userId;
+    public String userName;
+    public boolean isMale;
+
+    public UserS() {
+    }
 
     public UserS(int userId, String userName, boolean isMale) {
         this.userId = userId;

@@ -14,4 +14,7 @@ public class MyConstant {
 
     // permission
     public static final String PERMISSION_ACCESS_BOOK_SERVICE = "com.cyt.permission.ACCESS_BOOK_SERVICE";
+
+    // provider
+    public static final String PROVIDER_AUTHORITY_BOOK = "com.cyt.authority.provider";
 }

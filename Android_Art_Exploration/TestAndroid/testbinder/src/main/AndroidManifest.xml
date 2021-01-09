@@ -2,6 +2,13 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.cyt.testbinder">
 
+    <permission
+        android:name="com.cyt.permission.ACCESS_BOOK_SERVICE"
+        android:protectionLevel="normal" />
+
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+
     <application
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
@@ -9,7 +16,18 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-        <activity android:name=".testProvider.ProviderActivity"></activity>
+        <activity android:name=".testBinderPool.activity.BinderPoolActivity"></activity>
+
+        <service
+            android:name=".testBinderPool.BinderPoolService"
+            android:enabled="true"
+            android:exported="true" />
+        <service
+            android:name=".testSocket.TCPServerService"
+            android:enabled="true"
+            android:exported="true" />
+
+        <activity android:name=".testProvider.activity.ProviderActivity" />
         <activity android:name=".testAIDL.activity.BookManagerActivity" />
         <activity android:name=".testMessenger.activity.MessengerActivity" />
         <activity android:name=".MainActivity">
@@ -24,8 +42,8 @@
 
         <provider
             android:name=".testProvider.BookProvider"
-            android:authorities="com.cyt.provider"
-            android:permission="com.cyt.provider"
+            android:authorities="com.cyt.authority.provider"
+            android:permission="com.cyt.permission.provider"
             android:process=":provider" />
 
         <service
@@ -35,9 +53,5 @@
             android:name=".testMessenger.MessengerService"
             android:process=":remote" />
     </application>
-
-    <permission
-        android:name="com.cyt.permission.ACCESS_BOOK_SERVICE"
-        android:protectionLevel="normal" />
 
 </manifest>

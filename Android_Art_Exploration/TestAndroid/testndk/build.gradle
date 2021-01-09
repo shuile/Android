@@ -1,0 +1,52 @@
+plugins {
+    id 'com.android.application'
+}
+
+android {
+    compileSdkVersion rootProject.ext.compileSdkVersion
+
+    defaultConfig {
+        applicationId "cn.shui.testndk"
+        minSdkVersion rootProject.ext.minSdkVersion
+        targetSdkVersion rootProject.ext.targetSdkVersion
+        versionCode rootProject.ext.versionCode
+        versionName rootProject.ext.versionName
+        ndk {
+            moduleName "jni-test"
+        }
+        flavorDimensions "default"
+    }
+    buildTypes {
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+        }
+    }
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
+    sourceSets.main {
+        jniLibs.srcDir 'src/main/jni_libs'
+    }
+    sourceSets.main {
+        jni.srcDir 'src/main/jni_src'
+    }
+    productFlavors {
+        arm {
+            ndk {
+                abiFilter "armeabi"
+            }
+        }
+        x86 {
+            ndk {
+                abiFilter "x86"
+            }
+        }
+    }
+}
+
+dependencies {
+    implementation rootProject.ext.root_v7
+    implementation 'com.android.support.constraint:constraint-layout:2.0.4'
+}
