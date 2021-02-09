@@ -32,18 +32,6 @@ android {
     sourceSets.main {
         jni.srcDir 'src/main/jni_src'
     }
-    productFlavors {
-        arm {
-            ndk {
-                abiFilter "armeabi"
-            }
-        }
-        x86 {
-            ndk {
-                abiFilter "x86"
-            }
-        }
-    }
 }
 
 dependencies {
