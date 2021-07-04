@@ -1,0 +1,143 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ChangeListManager">
+    <list default="true" id="da628a1f-87b4-4de1-b927-dab112aa9e75" name="Default Changelist" comment="">
+      <change afterPath="$PROJECT_DIR$/src/cn/shui/testkotlin/chapter_12/Chapter12_README.md" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/cn/shui/testkotlin/chapter_12/test_12_2/AnnotationClassNoteTest.kt" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/cn/shui/testkotlin/chapter_12/test_12_2/Test_12_2_1.kt" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/cn/shui/testkotlin/chapter_12/test_12_2/Test_12_2_2.kt" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/cn/shui/testkotlin/chapter_12/test_12_2/Test_12_2_3.kt" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/cn/shui/testkotlin/chapter_12/test_12_3/Test_12_3_3.kt" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/cn/shui/testkotlin/chapter_12/test_12_4/ReflectDemo.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/cn/shui/testkotlin/chapter_12/test_12_4/TestReflect.kt" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/cn/shui/testkotlin/chapter_12/test_12_4/TestReflect2.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../HenCoder/PracticeDraw1" beforeDir="false" afterPath="$PROJECT_DIR$/../../HenCoder/PracticeDraw1" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../HenCoder/PracticeDraw2" beforeDir="false" afterPath="$PROJECT_DIR$/../../HenCoder/PracticeDraw2" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../HenCoder/PracticeDraw3" beforeDir="false" afterPath="$PROJECT_DIR$/../../HenCoder/PracticeDraw3" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../HenCoder/PracticeDraw4" beforeDir="false" afterPath="$PROJECT_DIR$/../../HenCoder/PracticeDraw4" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../HenCoder/PracticeDraw5" beforeDir="false" afterPath="$PROJECT_DIR$/../../HenCoder/PracticeDraw5" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../Kotlin从入门到实战/Chapter_1.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.gradle/6.7/executionHistory/executionHistory.bin" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.gradle/6.7/executionHistory/executionHistory.lock" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.gradle/6.7/fileChanges/last-build.bin" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.gradle/6.7/fileHashes/fileHashes.bin" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.gradle/6.7/fileHashes/fileHashes.lock" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.gradle/6.7/gc.properties" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.gradle/buildOutputCleanup/buildOutputCleanup.lock" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.gradle/buildOutputCleanup/cache.properties" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.gradle/buildOutputCleanup/outputFiles.bin" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.gradle/checksums/checksums.lock" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.gradle/checksums/md5-checksums.bin" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.gradle/checksums/sha1-checksums.bin" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.gradle/configuration-cache/gc.properties" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.gradle/vcs-1/gc.properties" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/.gitignore" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/compiler.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/gradle.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/jarRepositories.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/build.gradle" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/gradle/wrapper/gradle-wrapper.jar" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/gradle/wrapper/gradle-wrapper.properties" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/gradlew" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/gradlew.bat" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/settings.gradle" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/cn/shui/testkotlin/chapter4/TestClass.kt" beforeDir="false" />
+    </list>
+    <option name="SHOW_DIALOG" value="false" />
+    <option name="HIGHLIGHT_CONFLICTS" value="true" />
+    <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
+    <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="FileTemplateManagerImpl">
+    <option name="RECENT_TEMPLATES">
+      <list>
+        <option value="Interface" />
+        <option value="Class" />
+        <option value="Kotlin Class" />
+        <option value="Kotlin File" />
+      </list>
+    </option>
+  </component>
+  <component name="Git.Settings">
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$/../.." />
+  </component>
+  <component name="ProjectId" id="1udy9erIzFaeAloAFGHUsge0uYp" />
+  <component name="ProjectLevelVcsManager" settingsEditedManually="true" />
+  <component name="ProjectViewState">
+    <option name="hideEmptyMiddlePackages" value="true" />
+    <option name="showLibraryContents" value="true" />
+  </component>
+  <component name="PropertiesComponent">
+    <property name="Downloaded.Files.Path.Enabled" value="false" />
+    <property name="Repository.Attach.Annotations" value="false" />
+    <property name="Repository.Attach.JavaDocs" value="false" />
+    <property name="Repository.Attach.Sources" value="false" />
+    <property name="RunOnceActivity.OpenProjectViewOnStart" value="true" />
+    <property name="RunOnceActivity.ShowReadmeOnStart" value="true" />
+    <property name="settings.editor.selected.configurable" value="preferences.pluginManager" />
+  </component>
+  <component name="RunManager" selected="Kotlin.TestReflect2Kt">
+    <configuration name="ReflectDemo" type="Application" factoryName="Application" temporary="true" nameIsGenerated="true">
+      <option name="MAIN_CLASS_NAME" value="cn.shui.testkotlin.chapter_12.test_12_4.ReflectDemo" />
+      <module name="TestKotlin" />
+      <extension name="coverage">
+        <pattern>
+          <option name="PATTERN" value="cn.shui.testkotlin.chapter_12.test_12_4.*" />
+          <option name="ENABLED" value="true" />
+        </pattern>
+      </extension>
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
+    <configuration name="TestReflect2Kt" type="JetRunConfigurationType" temporary="true" nameIsGenerated="true">
+      <option name="MAIN_CLASS_NAME" value="cn.shui.testkotlin.chapter_12.test_12_4.TestReflect2Kt" />
+      <module name="TestKotlin" />
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
+    <configuration name="TestReflectKt" type="JetRunConfigurationType" temporary="true" nameIsGenerated="true">
+      <option name="MAIN_CLASS_NAME" value="cn.shui.testkotlin.chapter_12.test_12_4.TestReflectKt" />
+      <module name="TestKotlin" />
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
+    <configuration name="Test_12_2_3Kt" type="JetRunConfigurationType" temporary="true" nameIsGenerated="true">
+      <option name="MAIN_CLASS_NAME" value="cn.shui.testkotlin.chapter_12.test_12_2.Test_12_2_3Kt" />
+      <module name="TestKotlin" />
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
+    <configuration name="Test_12_3_3Kt" type="JetRunConfigurationType" temporary="true" nameIsGenerated="true">
+      <option name="MAIN_CLASS_NAME" value="cn.shui.testkotlin.chapter_12.test_12_3.Test_12_3_3Kt" />
+      <module name="TestKotlin" />
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
+    <recent_temporary>
+      <list>
+        <item itemvalue="Kotlin.TestReflect2Kt" />
+        <item itemvalue="Kotlin.TestReflectKt" />
+        <item itemvalue="Application.ReflectDemo" />
+        <item itemvalue="Kotlin.Test_12_3_3Kt" />
+        <item itemvalue="Kotlin.Test_12_2_3Kt" />
+      </list>
+    </recent_temporary>
+  </component>
+  <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="application-level" UseSingleDictionary="true" transferred="true" />
+  <component name="TaskManager">
+    <task active="true" id="Default" summary="Default task">
+      <changelist id="da628a1f-87b4-4de1-b927-dab112aa9e75" name="Default Changelist" comment="" />
+      <created>1625009611161</created>
+      <option name="number" value="Default" />
+      <option name="presentableId" value="Default" />
+      <updated>1625009611161</updated>
+    </task>
+    <servers />
+  </component>
+</project>
